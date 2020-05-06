@@ -9,23 +9,24 @@ DNA_DIR="/var/lib/holochain-conductor/dnas/"
 [[ -f $CONFIG_FILE ]] || { echo "$CONFIG_FILE is not a file." >&2;exit 1;}
 
 hash_from_id(){
-    local a="\"$1\"" # wrap id in double quotes
-    echo "$( awk -v my_id=$a '
+    echo "$( awk -v my_id=$1 '
         /\[\[dnas\]\]/,/^$/ {
+            gsub(/['"'"'"]/,"") # removes all the " and '
             if ($1 == "hash") hash=$3
             if ($1 == "id") id=$3
             if ($0 == "" && id == my_id) print hash
-        }' $CONFIG_FILE | xargs)" # xargs removes double quotes from around hash
+        }' $CONFIG_FILE )"
 }
 
 file_from_hash(){
     local a="\"$1\"" # wrap hash in double quotes
     echo "$( awk -v my_hash=$a '
         /\[\[dnas\]\]/,/^$/ {
+            gsub(/['"'"'"]/,"") # removes all the " and '
             if ($1 == "hash") hash=$3
             if ($1 == "file") file=$3
             if ($0 == "" && hash == my_hash) print file
-        }' $CONFIG_FILE | xargs)" # xargs removes double quotes from around file
+        }' $CONFIG_FILE )"
 }
 
 if [ $# -eq 0 ]
