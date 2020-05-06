@@ -73,7 +73,7 @@ tmp_path=$(mktemp -u)
 cp $dna_path $tmp_path # will it create any permission conflicts?
 
 # change uuid in a new file
-sed -i "/uuid/c\  \"uuid\": \"$uuid\"\," $tmp_path
+sed -i "\|uuid|c\  \"uuid\": \"$uuid\"\," $tmp_path
 
 # calculate new hash
 new_hash=$(hc hash -p $tmp_path | sed -n 2p | awk '{print $3}')
@@ -84,8 +84,8 @@ new_path=$DNA_DIR"/"$new_hash".dna.json"
 mv $tmp_path $new_path
 
 # sed new_hash and new_path
-sed -i "/hash.*$hash/c\hash = \'$new_hash\'" $CONFIG_FILE
-sed -i "/file.*$dna_path/c\file = \'$new_path\'" $CONFIG_FILE
+sed -i "\|hash.*$hash|c\hash = \'$new_hash\'" $CONFIG_FILE
+sed -i "\|file.*$dna_path|c\file = \'$new_path\'" $CONFIG_FILE
 
 echo ""
 echo "new_hash: $new_hash"
