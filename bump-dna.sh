@@ -3,10 +3,10 @@
 # type bump-dna for help
 ##
 
+set -e
+
 CONFIG_FILE="/var/lib/holochain-conductor/conductor-config.toml"
 DNA_DIR="/var/lib/holochain-conductor/dnas/"
-
-[[ -f $CONFIG_FILE ]] || { echo "$CONFIG_FILE is not a file." >&2;exit 1;}
 
 hash_from_id(){
     echo "$( awk -v my_id=$1 '
@@ -19,8 +19,7 @@ hash_from_id(){
 }
 
 file_from_hash(){
-    local a="\"$1\"" # wrap hash in double quotes
-    echo "$( awk -v my_hash=$a '
+    echo "$( awk -v my_hash=$1 '
         /\[\[dnas\]\]/,/^$/ {
             gsub(/['"'"'"]/,"") # removes all the " and '
             if ($1 == "hash") hash=$3
@@ -61,6 +60,7 @@ do
 done
 
 # Error checks
+[[ -f $CONFIG_FILE ]] || { echo "$CONFIG_FILE is not a file." >&2;exit 1;}
 [[ -n $optflag ]] || { echo "Either -i or -h is required for identification of DNA" >&2;exit 1;}
 hash=${hash_h:-${hash_id}} # -h overwrites -i
 dna_path=$( file_from_hash $hash)
