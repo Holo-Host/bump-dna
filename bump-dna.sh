@@ -6,12 +6,12 @@
 set -e
 
 CONFIG_FILE="/var/lib/holochain-conductor/conductor-config.toml"
-DNA_DIR="/var/lib/holochain-conductor/dnas/"
+DNA_DIR="/var/lib/holochain-conductor/dnas"
 
 hash_from_id(){
     awk -v my_id="$1" '
         /\[\[dnas\]\]/,/^$/ {
-            gsub(/['"'"'"]/,"") # removes all the " and '
+            gsub(/['"'"'"]/,"")
             if ($1 == "hash") hash=$3
             if ($1 == "id") id=$3
             if ($0 == "" && id == my_id) print hash
@@ -21,7 +21,7 @@ hash_from_id(){
 file_from_hash(){
     awk -v my_hash="$1" '
         /\[\[dnas\]\]/,/^$/ {
-            gsub(/['"'"'"]/,"") # removes all the " and '
+            gsub(/['"'"'"]/,"")
             if ($1 == "hash") hash=$3
             if ($1 == "file") file=$3
             if ($0 == "" && hash == my_hash) print file
