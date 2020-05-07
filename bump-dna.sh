@@ -9,23 +9,23 @@ CONFIG_FILE="/var/lib/holochain-conductor/conductor-config.toml"
 DNA_DIR="/var/lib/holochain-conductor/dnas/"
 
 hash_from_id(){
-    echo "$( awk -v my_id=$1 '
+    awk -v my_id="$1" '
         /\[\[dnas\]\]/,/^$/ {
             gsub(/['"'"'"]/,"") # removes all the " and '
             if ($1 == "hash") hash=$3
             if ($1 == "id") id=$3
             if ($0 == "" && id == my_id) print hash
-        }' $CONFIG_FILE )"
+        }' $CONFIG_FILE
 }
 
 file_from_hash(){
-    echo "$( awk -v my_hash=$1 '
+    awk -v my_hash="$1" '
         /\[\[dnas\]\]/,/^$/ {
             gsub(/['"'"'"]/,"") # removes all the " and '
             if ($1 == "hash") hash=$3
             if ($1 == "file") file=$3
             if ($0 == "" && hash == my_hash) print file
-        }' $CONFIG_FILE )"
+        }' $CONFIG_FILE
 }
 
 if [ $# -eq 0 ]
@@ -42,7 +42,7 @@ do
     case $OPTION in
         i)
             id=${OPTARG}
-            hash_id=$( hash_from_id $id )
+            hash_id=$( hash_from_id "$id" )
             optflag=1
             [[ -n $hash_id ]] || { echo "There is no dna with id $id" >&2;exit 1;}
             ;;
@@ -63,26 +63,26 @@ done
 [[ -f $CONFIG_FILE ]] || { echo "$CONFIG_FILE is not a file." >&2;exit 1;}
 [[ -n $optflag ]] || { echo "Either -i or -h is required for identification of DNA" >&2;exit 1;}
 hash=${hash_h:-${hash_id}} # -h overwrites -i
-dna_path=$( file_from_hash $hash)
+dna_path=$( file_from_hash "$hash")
 [[ -n $dna_path ]] || { echo "There is no dna with hash $hash" >&2;exit 1;}
 [[ -f $dna_path ]] || { echo "Failed to read from file $dna_path" >&2;exit 1;}
 
 # If no uuid provided print current uuid
-[[ -n $uuid ]] || { echo "Current uuid is "$( grep 'uuid' ${dna_path} | awk '{print $2}' | sed 's/,$//' | xargs );exit 0;}
+[[ -n $uuid ]] || { echo "Current uuid is "$( grep 'uuid' "$dna_path" | awk '{print $2}' | sed 's/,$//' | xargs );exit 0;}
 
 tmp_path=$(mktemp -u)
-cp $dna_path $tmp_path # will it create any permission conflicts?
+cp "$dna_path" "$tmp_path" # will it create any permission conflicts?
 
 # change uuid in a new file
-sed -i "\|uuid|c\  \"uuid\": \"$uuid\"\," $tmp_path
+sed -i "\|uuid|c\  \"uuid\": \"$uuid\"\," "$tmp_path"
 
 # calculate new hash
-new_hash=$(hc hash -p $tmp_path | sed -n 2p | awk '{print $3}')
+new_hash=$(hc hash -p "$tmp_path" | sed -n 2p | awk '{print $3}')
 
 # copy updated dna to dnas/
-new_path=$DNA_DIR"/"$new_hash".dna.json"
+new_path=$DNA_DIR"/$new_hash.dna.json"
 [[ -d $DNA_DIR ]] || { echo "Creating dir $DNA_DIR"; mkdir $DNA_DIR;}
-mv $tmp_path $new_path
+mv "$tmp_path" "$new_path"
 
 # sed new_hash and new_path
 sed -i "\|hash.*$hash|c\hash = \'$new_hash\'" $CONFIG_FILE
