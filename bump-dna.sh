@@ -71,7 +71,7 @@ dna_path=$( file_from_hash "$hash")
 [[ -n $uuid ]] || { echo "Current uuid is "$( grep 'uuid' "$dna_path" | awk '{print $2}' | sed 's/,$//' | xargs );exit 0;}
 
 tmp_path=$(mktemp -u)
-cp "$dna_path" "$tmp_path" # will it create any permission conflicts?
+cp "$dna_path" "$tmp_path"
 
 # change uuid in a new file
 sed -i "\|uuid|c\  \"uuid\": \"$uuid\"\," "$tmp_path"
@@ -82,7 +82,7 @@ new_hash=$(hc hash -p "$tmp_path" | sed -n 2p | awk '{print $3}')
 # copy updated dna to dnas/
 new_path=$DNA_DIR"/$new_hash.dna.json"
 [[ -d $DNA_DIR ]] || { echo "Creating dir $DNA_DIR"; mkdir $DNA_DIR;}
-mv "$tmp_path" "$new_path"
+install -o holochain-conductor -g holochain-conductor -m 666 "$tmp_path" "$new_path"
 
 # sed new_hash and new_path
 sed -i "\|hash.*$hash|c\hash = \'$new_hash\'" $CONFIG_FILE
