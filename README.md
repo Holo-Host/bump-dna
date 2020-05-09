@@ -14,3 +14,5 @@ If successful the script will:
 - get new hash of dna and rename dna file to `new_hash.dna.json`
 - print new hash
 - update holochain config file and restart `holochain-conductor.service` for changes to take effect
+
+> HEADS UP: this script is directly interacting with configuration of holochain conductor. HPOS is managing this configuration file for system consistency, therefore if you want to bump dnas you need to switch to `development` profile of HPOS ( see [holo-nixpkgs](https://github.com/Holo-Host/holo-nixpkgs))
