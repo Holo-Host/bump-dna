@@ -6,7 +6,7 @@
 set -e
 
 CONFIG_FILE="/var/lib/holochain-conductor/conductor-config.toml"
-DNA_DIR="/var/lib/holochain-conductor/dnas"
+CONFIG_DIR="/var/lib/holochain-conductor"
 
 hash_from_id(){
     awk -v my_id="$1" '
@@ -80,13 +80,15 @@ sed -i "\|uuid|c\  \"uuid\": \"$uuid\"\," "$tmp_path"
 new_hash=$(hc hash -p "$tmp_path" | sed -n 2p | awk '{print $3}')
 
 # copy updated dna to dnas/
-new_path=$DNA_DIR"/$new_hash.dna.json"
-[[ -d $DNA_DIR ]] || { echo "Creating dir $DNA_DIR"; mkdir $DNA_DIR;}
+dna_dir=$CONFIG_DIR"/dnas"
+new_path=$dna_dir"/$new_hash.dna.json"
+[[ -d $dna_dir ]] || { echo "Creating dir $dna_dir"; mkdir $dna_dir;}
 install -o holochain-conductor -g holochain-conductor -m 666 "$tmp_path" "$new_path"
 
-# sed new_hash and new_path
+# sed dnas.hash, dnas.file and instances.storage.path
 sed -i "\|hash.*$hash|c\hash = \'$new_hash\'" $CONFIG_FILE
 sed -i "\|file.*$dna_path|c\file = \'$new_path\'" $CONFIG_FILE
+sed -i "\|path.*$hash|c\path = \'$CONFIG_DIR/$new_hash\'" $CONFIG_FILE
 
 echo ""
 echo "new_hash: $new_hash"
