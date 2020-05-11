@@ -77,6 +77,7 @@ cp "$dna_path" "$tmp_path"
 sed -i "\|uuid|c\  \"uuid\": \"$uuid\"\," "$tmp_path"
 
 # calculate new hash
+cd "$(dirname "$tmp_path")"
 new_hash=$(hc hash -p "$tmp_path" | sed -n 2p | awk '{print $3}')
 
 # copy updated dna to dnas/
