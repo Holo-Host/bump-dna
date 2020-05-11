@@ -4,7 +4,7 @@ with pkgs;
 
 {
 
-  bump-dna = stdenv.mkDerivation rec {
+  bump-dna-cli = stdenv.mkDerivation rec {
     name = "bump-dna";
     src = gitignoreSource ./.;
 
